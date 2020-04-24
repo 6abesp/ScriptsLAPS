@@ -1,0 +1,30 @@
+$path1 = read-host "coloca una direccion en tu equipo"  
+$nombre=read-host "coloca el nombre que tendrÃ¡ el archivo"
+$exportPath =  $path1 + $nombre+".csv"
+
+$name = read-host "coloca el nombre de tu OU"
+
+$ou = Get-ADOrganizationalUnit -LDAPFilter "(name=$ouInput)" | Select-Object DistinguishedName 
+$computers = get-adcomputer -Filter * -Properties * -SearchBase $ou
+
+Add-Content -Path  $exportPath  -Value '"name", "OS", "Password"'
+
+
+$psObject= foreach($computer in $computers)
+{
+
+
+    $Name=$computer.name 
+
+    $OS=$computer.operatingsystem
+    
+    $Pwd=$computer.'ms-Mcs-AdmPwd'
+    
+   
+    $print = @("$Name, $Os, $Pwd" ) 
+
+    $print | ForEach-Object { Add-Content -Path $exportPath -Value $_ }
+
+}
+
+Write-Host "El archivo ha sido exportado a $exportPath" -ForegroundColor Green
